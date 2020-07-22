@@ -9,7 +9,7 @@ from tkinter import scrolledtext as st
 from tkinter import ttk
 from Personality_Insight_API_Class import PersonalityInsightsAPI
 import matplotlib.pyplot as plt
-
+import os
 
 class Aplication_Personality():
     
@@ -21,13 +21,13 @@ class Aplication_Personality():
         self._PutLabels()
         self._Set_API_KEY_CANVAS()
         self._Put_API_KEY_CANVAS()
+        
         self.main_window.mainloop()
     
     def _SetWindowPreferences(self):
         self.main_window.title("Análisis de personalidad IBM - Personality Insight - Juan Pablo Díaz Correa")
-        self.main_window.geometry("600x600")
+        self.main_window.geometry("1345x550")
         self.main_window.iconbitmap("./Logo-JP.ico")
-        self.main_window.resizable(0,0)
     
 
     #------------Labels--------------#
@@ -39,8 +39,8 @@ class Aplication_Personality():
         self.autor_label = tk.Label(self.main_window, text=autor, font=("Berlin Sans FB", 12))
     
     def _PutLabels(self):
-        self.welcom_label.place(x=100, y=3)
-        self.autor_label.place(x=300, y=70)
+        self.welcom_label.place(x=250, y=3)
+        self.autor_label.place(x=550, y=70)
     
 
     
@@ -95,9 +95,10 @@ class Aplication_Personality():
         Español = es | Chino tradicional = zh-tw
         """
         #-------Parametros adicionales-----#
+        """
         self._RAW_SOCRES_VALUE = tk.BooleanVar()
         self._RAW_SCORES = tk.Checkbutton(self._PARAMS_CANVAS, text="Raw Scores", variable=self._RAW_SOCRES_VALUE)
-        
+        """
         self._CONSUMPTION_PREFERENCES_VALUE = tk.BooleanVar()
         self._CONSUMPTION_PREFERENCES = tk.Checkbutton(self._PARAMS_CANVAS, text="Preferencias de consumo", variable=self._CONSUMPTION_PREFERENCES_VALUE)
 
@@ -108,7 +109,7 @@ class Aplication_Personality():
         self._CONTENT_LANGUAGE.pack()
         self._ACCEPT_LENGUAGE_LABEL.pack()
         self._ACCEPT_LENGUAGE.pack()
-        self._RAW_SCORES.pack()
+        #self._RAW_SCORES.pack()
         self._CONSUMPTION_PREFERENCES.pack()
 
     
@@ -143,6 +144,8 @@ class Aplication_Personality():
 
         self._Set_Params_IBM()
         self._Put_Params_IBM()
+        self._CONTENT_LANGUAGE.current(4)
+        self._ACCEPT_LENGUAGE.current(9)
 
     def _set_params(self):
         self._diccionario_content_language = {'Arabe'  : 'ar', 
@@ -168,36 +171,53 @@ class Aplication_Personality():
                 print(value)
         
         for key,value in self._diccionario_accept_language.items(): #Buscamos en el diccionario de lenguajes aceptados
-            if key == self._CONTENT_LANGUAGE.get():
-                self._accept_languague_value = value
+            if key == self._ACCEPT_LENGUAGE.get():
+                
+                self.__accept_languague_value = value
                 print(value)
         
         
         self._IBM_personality.SetParams(content_language = self._content_languague_value, 
-                                       accept_language= self._accept_languague_value,
-                                       raw_scores= self._RAW_SOCRES_VALUE.get(),
+                                       accept_language= self.__accept_languague_value,
                                        consumption_preferences= self._CONSUMPTION_PREFERENCES_VALUE.get(),
                                        charset=';utf-8'
                                        )
+
+    def _view_stats(self):
+        
+        self._Result_box_label = tk.Label(self.main_window, text='Resultado')
+        self._Result_box_label.place(x=740, y=130)
+        self._Result_box = st.ScrolledText(self.main_window, height=20, width=90)
+        self._Result_box.place(x=600, y=150)
+        self._Result_box.delete('1.0', tk.END)
+        results = ""
+        for value in self.profile['personality']:
+            results += (value.get('name') + ': ' + 'percentil: '+ str(value.get('percentile')) + '\n'+ '\n')
+            for list_children in value.get('children'):
+                results += ('     ' +list_children.get('name')+': ' +'percentil: ' + str(list_children.get('percentile')) + '\n')
+                results +=('     ' + 'Importancia: ' + str(list_children.get('significant')) + '\n\n')
+            
+            
+            if self._CONSUMPTION_PREFERENCES_VALUE.get():
+                for value in self.profile['consumption_preferences']:
+                    results += ('\n')
+                    results += (value.get('name') + '\n')
+                    for value2 in  value.get('consumption_preferences'):
+                        results += (value2.get('name') + ' : ' +str(value2.get('score')) + '\n')
+        self._Result_box.insert(tk.INSERT, results)
+        self._Result_box.configure(state='disabled')
         
 
+              
 
-    def _send_text(self):
-        self._set_params()
-        self.profile = self._IBM_personality.Request_analize(content_type='text/plain', 
-                                                            content=self._ENTRY_BOX.get('1.0', tk.END))        
+    def _view_plot(self):
         plt.figure()
         plt.subplots_adjust(hspace=0.5, wspace=0.5)
         i = 1
         for value in self.profile['personality']:
             etiquetas = list()
             valores = list()
-            
-            #print('#------------------------------#')
-            #print(value.get('name'))
-            #print('percentil: '+ str(value.get('percentile')))
             for list_children in value.get('children'):
-                #print(list_children.get('name')) #Obtenemos subcategoria
                 case = 0
                 result = ""
                 for letter in list_children.get('name'):
@@ -209,25 +229,23 @@ class Aplication_Personality():
 
                 etiquetas.append(result)
                 valores.append(list_children.get('percentile'))
-                #print('percentil: ' + str(list_children.get('percentile')))
-                #print('Significante: ' + str(list_children.get('significant')))
             plt.subplot(2,3,i)
             plt.barh(etiquetas, valores)
             plt.yticks(fontsize='7') 
             plt.title(value.get('name'))
-            i+=1
-            
-        
+            i+=1        
         plt.show()
-        #print(self.profile)
-
+    
+    def _send_text(self):
+        self._set_params()
+        self.profile = self._IBM_personality.Request_analize(content_type='text/plain', 
+                                                            content=self._ENTRY_BOX.get('1.0', tk.END))        
+        self._view_stats()
+        self._view_plot()
     
         
         
 
-    
-        
-    
-    
+     
 if __name__ == '__main__':
     App = Aplication_Personality()
