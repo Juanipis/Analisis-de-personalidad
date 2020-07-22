@@ -5,7 +5,7 @@ from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
 class PersonalityInsightsAPI():
     def __init__(self, APIKEY, url,version='2017-10-13'):
-        try:    
+        try:
             self.authenticator = IAMAuthenticator(APIKEY)
             self.personality_insights = PersonalityInsightsV3(
                 version = version,
@@ -15,7 +15,7 @@ class PersonalityInsightsAPI():
             print("Exito, credenciales validas")
         except:
             print("Error, credenciales no validas")
-    
+
     def SetParams(self, content_language = 'es', accept_language = 'es', charset=';utf-8', raw_scores=False, consumption_preferences=False):
         try:
             self.content_language = content_language
@@ -26,7 +26,7 @@ class PersonalityInsightsAPI():
             print("Parametros añadidos con exito")
         except:
             print("Parametros incorrectos")
-        
+
 
     def Request_analize(self, content_type, content):
         self.profile = self.personality_insights.profile(
@@ -38,12 +38,5 @@ class PersonalityInsightsAPI():
             content_language = self.content_language,
             accept_language = self.accept_language,
             ).get_result()
-        
+
         return self.profile
-        
-       
-        
-        
-
-
-
