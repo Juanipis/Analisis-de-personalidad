@@ -1,4 +1,4 @@
-# Analisis de personalidad con IBM Personality Insight
+# Análisis de personalidad con IBM Personality Insight
 _Este en un pequeño programa desarrollado en Python que tiene la funcionalidad de simplificar la experiencia de usuario para usar este servicio de inteligencia artificial diseñado por IBM_
 
 ## Comenzando 🚀
