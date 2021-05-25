@@ -34,5 +34,4 @@ python3 main.py
 
 _Tambien puedes cargar un archivo de texto con el boton **Abrir .txt**_
 
-### Muchas gracias, recuerda seguirme en twitter @Juanipisx
-https://twitter.com/Juanipisx
+### Muchas gracias, recuerda seguirme en twitter [@Juanipis](https://twitter.com/Juanipis)
